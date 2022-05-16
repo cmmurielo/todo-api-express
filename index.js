@@ -5,7 +5,7 @@ import cors from "cors";
 
 const app = express()
 const port = 3000
-const mongoAtlasUri = 'mongodb+srv://admin:<passwors>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
+const mongoAtlasUri = 'mongodb+srv://admin:<password>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
 
 mongoose.connect(mongoAtlasUri)
 
