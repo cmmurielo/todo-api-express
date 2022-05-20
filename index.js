@@ -1,21 +1,37 @@
 import express from "express";
 import mongoose from "mongoose";
-import Task from "./controllers/task.controller.js";
-import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import expressJwt from "express-jwt";
+import { expressjwt } from "express-jwt";
+import 'dotenv/config'
+import cors from "cors";
 import User from "./models/user.model.js";
+import Task from "./controllers/task.controller.js";
+
 
 const app = express()
 const port = 3000
-const mongoAtlasUri = 'mongodb+srv://admin:<PASSWORD>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
+const mongoAtlasUri = 'mongodb+srv://admin:<password>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
 mongoose.connect(mongoAtlasUri)
 
 app.use(express.json())
 app.use(cors())
 
-const signToken = _id => jwt.sign({_id}, 'mi-secreto')
+const validateJwt = expressjwt({secret: process.env.SECRET_KEY, algorithms: ['HS256']})
+const signToken = _id => jwt.sign({_id}, process.env.SECRET_KEY)
+const findAndAssignUser = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.auth._id)
+        if (!user){
+            return res.status(401).end()
+        }
+        req.user = user
+        next()
+    } catch (e) {
+        next(e)
+    }
+}
+const isAuthenticated = express.Router().use(validateJwt, findAndAssignUser)
 
 //AUTH
 app.post('/api/auth', async (req, res) => {
@@ -58,7 +74,7 @@ app.post('/api/login', async (req, res) => {
 })
 
 //TASK
-app.get('/api/', Task.list)
+app.get('/api/', isAuthenticated,Task.list)
 app.get('/api/:id', Task.get)
 app.post('/api/', Task.create)
 app.put('/api/:id', Task.update)
