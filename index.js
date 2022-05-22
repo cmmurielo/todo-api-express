@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { expressjwt } from "express-jwt";
+import {expressjwt} from "express-jwt";
 import 'dotenv/config'
 import cors from "cors";
 import User from "./models/user.model.js";
@@ -11,7 +11,7 @@ import Task from "./controllers/task.controller.js";
 
 const app = express()
 const port = 3000
-const mongoAtlasUri = 'mongodb+srv://admin:<password>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
+const mongoAtlasUri = 'mongodb+srv://admin:<pasword>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
 mongoose.connect(mongoAtlasUri)
 
 app.use(express.json())
@@ -22,7 +22,7 @@ const signToken = _id => jwt.sign({_id}, process.env.SECRET_KEY)
 const findAndAssignUser = async (req, res, next) => {
     try {
         const user = await User.findById(req.auth._id)
-        if (!user){
+        if (!user) {
             return res.status(401).end()
         }
         req.user = user
@@ -54,18 +54,18 @@ app.post('/api/auth', async (req, res) => {
 
 //LOGIN
 app.post('/api/login', async (req, res) => {
-    const { body } = req
+    const {body} = req
     try {
         const user = await User.findOne({username: body.username})
         if (!user) {
-            res.send('Usuario o contrasena invalida')
+            res.sendStatus(401)
         } else {
             const isMath = await bcrypt.compare(body.password, user.password)
             if (isMath) {
                 const signed = signToken(user._id)
                 res.status(200).send(signed)
             } else {
-                res.status(403).send('Usuario o contrasena invalida')
+                res.sendStatus(401)
             }
         }
     } catch (e) {
@@ -74,12 +74,12 @@ app.post('/api/login', async (req, res) => {
 })
 
 //TASK
-app.get('/api/', isAuthenticated,Task.list)
-app.get('/api/:id', Task.get)
-app.post('/api/', Task.create)
-app.put('/api/:id', Task.update)
-app.delete('/api/:id', Task.delete)
+app.get('/api', isAuthenticated, Task.list)
+app.get('/api/:id', isAuthenticated, Task.get)
+app.post('/api', isAuthenticated, Task.create)
+app.put('/api/:id', isAuthenticated, Task.update)
+app.delete('/api/:id', isAuthenticated, Task.delete)
 
 app.listen(port, () => {
-    console.log('La app esta corriendo en el puerto ' + port );
+    console.log('La app esta corriendo en el puerto ' + port);
 })
