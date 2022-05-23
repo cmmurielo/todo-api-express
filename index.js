@@ -11,7 +11,7 @@ import Task from "./controllers/task.controller.js";
 
 const app = express()
 const port = 3000
-const mongoAtlasUri = 'mongodb+srv://admin:<pasword>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
+const mongoAtlasUri = 'mongodb+srv://admin:<PASSWORD>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
 mongoose.connect(mongoAtlasUri)
 
 app.use(express.json())
@@ -19,6 +19,7 @@ app.use(cors())
 
 const validateJwt = expressjwt({secret: process.env.SECRET_KEY, algorithms: ['HS256']})
 const signToken = _id => jwt.sign({_id}, process.env.SECRET_KEY)
+
 const findAndAssignUser = async (req, res, next) => {
     try {
         const user = await User.findById(req.auth._id)
@@ -29,8 +30,9 @@ const findAndAssignUser = async (req, res, next) => {
         next()
     } catch (e) {
         next(e)
-    }
+    }    
 }
+
 const isAuthenticated = express.Router().use(validateJwt, findAndAssignUser)
 
 //AUTH
@@ -63,7 +65,11 @@ app.post('/api/login', async (req, res) => {
             const isMath = await bcrypt.compare(body.password, user.password)
             if (isMath) {
                 const signed = signToken(user._id)
-                res.status(200).send(signed)
+                res.status(200).send({
+                    token: signed,
+                    userId: user._id
+                })
+
             } else {
                 res.sendStatus(401)
             }
@@ -74,11 +80,11 @@ app.post('/api/login', async (req, res) => {
 })
 
 //TASK
-app.get('/api', isAuthenticated, Task.list)
-app.get('/api/:id', isAuthenticated, Task.get)
-app.post('/api', isAuthenticated, Task.create)
-app.put('/api/:id', isAuthenticated, Task.update)
-app.delete('/api/:id', isAuthenticated, Task.delete)
+app.get('/api/tasks/:user', isAuthenticated, Task.listByUser)
+// app.get('/api/task/:id', isAuthenticated, Task.get)
+app.post('/api/task', isAuthenticated, Task.create)
+app.put('/api/task/:id', isAuthenticated, Task.update)
+app.delete('/api/task/:id', isAuthenticated, Task.delete)
 
 app.listen(port, () => {
     console.log('La app esta corriendo en el puerto ' + port);
