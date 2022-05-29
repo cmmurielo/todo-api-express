@@ -11,7 +11,7 @@ import Task from "./controllers/task.controller.js";
 
 const app = express()
 const port = 3000
-const mongoAtlasUri = 'mongodb+srv://admin:<PASSWORD>@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
+const mongoAtlasUri = 'mongodb+srv://admin:QW5f12jFKpDixVgw@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
 mongoose.connect(mongoAtlasUri)
 
 app.use(express.json())
