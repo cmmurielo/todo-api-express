@@ -10,7 +10,7 @@ import Task from "./controllers/task.controller.js";
 
 
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000;
 const mongoAtlasUri = 'mongodb+srv://admin:QW5f12jFKpDixVgw@cluster0.gbfnw.mongodb.net/todo?retryWrites=true&w=majority'
 mongoose.connect(mongoAtlasUri)
 
@@ -85,6 +85,9 @@ app.get('/api/tasks/:user', isAuthenticated, Task.listByUser)
 app.post('/api/task', isAuthenticated, Task.create)
 app.put('/api/task/:id', isAuthenticated, Task.update)
 app.delete('/api/task/:id', isAuthenticated, Task.delete)
+
+
+const host = "0.0.0.0"
 
 app.listen(port, () => {
     console.log('La app esta corriendo en el puerto ' + port);
