@@ -37,6 +37,7 @@ const findAndAssignUser = async (req, res, next) => {
 
 const isAuthenticated = express.Router().use(validateJwt, findAndAssignUser)
 
+
 //AUTH
 app.post('/api/auth', async (req, res) => {
     const {body} = req
@@ -79,6 +80,11 @@ app.post('/api/login', async (req, res) => {
     } catch (e) {
         res.status(500).send(e.message)
     }
+})
+
+
+app.get('/api', async (req, res) => {
+    res.send('Hola')
 })
 
 //TASK
